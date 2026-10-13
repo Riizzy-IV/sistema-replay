@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vila El Mare Replay — Painel</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 720px; margin: 32px auto; padding: 0 16px; background: #faf2df; color: #123a55; }
+  button { font-size: 20px; padding: 16px 28px; border: 0; border-radius: 12px; background: #1f6fa3; color: #faf2df; cursor: pointer; }
+  button:disabled { opacity: .5; }
+  button.secundario { font-size: 15px; padding: 10px 18px; background: transparent; color: #b3261e; border: 1px solid #b3261e; }
+  pre { background: #fff; padding: 16px; border-radius: 12px; overflow: auto; font-size: 13px; }
+  #msg { margin-left: 12px; }
+</style>
+</head>
+<body>
+<h1>Vila El Mare Replay</h1>
+<p><button id="btn">Gerar replay</button><span id="msg"></span></p>
+<p><button id="apagar" class="secundario">Apagar todos os replays</button></p>
+<h2>Status</h2>
+<pre id="status">carregando…</pre>
+<script>
+  const btn = document.getElementById('btn'), msg = document.getElementById('msg');
+  btn.onclick = async () => {
+    btn.disabled = true;
+    const r = await fetch('/replay', { method: 'POST', headers: { 'X-Token': '{{TOKEN}}' } });
+    msg.textContent = r.status === 202 ? 'Gerando… (' + (await r.json()).id + ')' : 'Erro ' + r.status;
+    setTimeout(() => { btn.disabled = false; }, 2000);
+  };
+  document.getElementById('apagar').onclick = async () => {
+    if (!confirm('Apagar TODOS os replays salvos neste PC? Isso não pode ser desfeito.')) return;
+    const r = await fetch('/replays', { method: 'DELETE' });
+    msg.textContent = r.ok ? (await r.json()).apagados + ' replay(s) apagado(s)' : 'Erro ' + r.status;
+  };
+  async function atualizar() {
+    try { document.getElementById('status').textContent = JSON.stringify(await (await fetch('/status')).json(), null, 2); }
+    catch (e) { document.getElementById('status').textContent = 'servidor fora do ar'; }
+  }
+  atualizar(); setInterval(atualizar, 2000);
+</script>
+</body>
+</html>

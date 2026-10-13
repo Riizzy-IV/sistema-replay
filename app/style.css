@@ -1,0 +1,111 @@
+/* Identidade Vila El Mare: azul #5DADE2 + creme #FAF2DF */
+:root {
+  --azul: #5dade2;          /* cor da marca (fundos grandes, cabeçalho) */
+  --azul-forte: #1f6fa3;    /* botões e destaques: contraste suficiente com o creme */
+  --marinho: #123a55;       /* texto */
+  --creme: #faf2df;
+  --creme-2: #f1e6cb;
+  --cartao: #fffdf7;
+  --texto-2: #4f6a7c;
+  --raio: 18px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --azul-forte: #5dade2;
+    --marinho: #faf2df;
+    --creme: #0d2433;
+    --creme-2: #163449;
+    --cartao: #143044;
+    --texto-2: #a9c4d6;
+  }
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--creme);
+  color: var(--marinho);
+  min-height: 100dvh;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+button { font: inherit; color: inherit; }
+
+.topo {
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  padding: calc(18px + env(safe-area-inset-top)) 16px 16px;
+  background: var(--azul);
+  border-bottom-left-radius: 28px; border-bottom-right-radius: 28px;
+}
+.logo { width: min(240px, 64vw); height: auto; display: block; }
+.subtitulo {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 12px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: #0f3550;
+}
+.ao-vivo {
+  letter-spacing: .05em; text-transform: none; font-weight: 600;
+  background: #faf2df; color: #0f3550; padding: 2px 8px; border-radius: 999px;
+}
+
+.dias {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  max-width: 720px; margin: 16px auto 8px; padding: 0 16px;
+}
+.dias > button {
+  width: 44px; height: 44px; border-radius: 50%; border: 0;
+  background: var(--creme-2); font-size: 24px; cursor: pointer; color: var(--marinho);
+}
+.dias > button:disabled { opacity: .3; cursor: default; }
+.dia-atual { position: relative; font-weight: 700; font-size: 18px; text-transform: capitalize; }
+.dia-atual input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+main { max-width: 720px; margin: 0 auto; padding: 8px 16px 32px; }
+.lista { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+@media (min-width: 560px) { .lista { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.card {
+  width: 100%; display: flex; flex-direction: column; text-align: left; padding: 0; border: 0;
+  background: var(--cartao); border-radius: var(--raio); overflow: hidden; cursor: pointer; position: relative;
+  box-shadow: 0 1px 2px rgb(18 58 85 / .08), 0 6px 18px rgb(18 58 85 / .06);
+}
+.card img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: var(--creme-2); display: block; }
+.card-info { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 14px; }
+.card-info strong { font-size: 18px; }
+.card-info span { color: var(--texto-2); font-size: 14px; }
+.play {
+  position: absolute; top: 12px; right: 12px; width: 42px; height: 42px; border-radius: 50%;
+  display: grid; place-items: center; background: var(--creme); color: #1f6fa3; font-size: 16px;
+  box-shadow: 0 2px 8px rgb(0 0 0 / .2);
+}
+
+.vazio, .aviso { text-align: center; color: var(--texto-2); padding: 40px 16px; line-height: 1.5; }
+.vazio img { border-radius: 18px; }
+.vazio strong { color: var(--marinho); }
+.aviso { color: #b3261e; padding: 16px; }
+
+.player {
+  width: min(960px, 100vw); max-width: 100vw; max-height: 100dvh; margin: auto; padding: 0;
+  border: 0; border-radius: var(--raio); background: #0b1f2c; color: #faf2df;
+}
+.player::backdrop { background: rgb(8 24 35 / .88); }
+.player-topo { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px 10px 16px; }
+.fechar { border: 0; background: transparent; font-size: 22px; width: 44px; height: 44px; cursor: pointer; }
+.player video { width: 100%; display: block; background: #000; max-height: 70dvh; }
+.cameras { display: flex; gap: 8px; padding: 12px 16px 0; }
+.cameras[hidden] { display: none; }
+.cameras button {
+  flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #faf2df40; background: transparent; cursor: pointer;
+}
+.cameras button[aria-selected="true"] { background: #faf2df; color: #123a55; }
+.acoes { display: flex; gap: 10px; padding: 16px; }
+.botao {
+  flex: 1; text-align: center; padding: 14px; border-radius: 12px; border: 1px solid #faf2df55;
+  background: transparent; color: #faf2df; text-decoration: none; font-weight: 600; cursor: pointer;
+}
+.botao.primario { background: var(--azul); border-color: var(--azul); color: #0f3550; }
+
+.toast {
+  position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom)); transform: translateX(-50%);
+  background: #123a55; color: #faf2df; padding: 12px 20px; border-radius: 999px;
+  box-shadow: 0 4px 16px rgb(0 0 0 / .25);
+}

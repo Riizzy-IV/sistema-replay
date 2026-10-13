@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vila El Mare Replay</title>
+<meta name="theme-color" content="#5DADE2">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Vila El Mare">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topo">
+  <img class="logo" src="logo-texto.png" alt="Vila El Mare" width="730" height="160">
+  <div class="subtitulo">
+    <span>Replays da quadra</span>
+    <span id="ao-vivo" class="ao-vivo" hidden>● ao vivo</span>
+  </div>
+</header>
+
+<nav class="dias" aria-label="Escolher dia">
+  <button id="dia-anterior" aria-label="Dia anterior">‹</button>
+  <label class="dia-atual">
+    <span id="dia-texto">Hoje</span>
+    <input id="dia-input" type="date" aria-label="Escolher data">
+  </label>
+  <button id="dia-proximo" aria-label="Próximo dia">›</button>
+</nav>
+
+<main>
+  <p id="aviso" class="aviso" hidden></p>
+  <ul id="lista" class="lista"></ul>
+  <div id="vazio" class="vazio" hidden>
+    <img src="icon-192.png" alt="" width="72" height="72">
+    <p><strong>Nenhum replay neste dia.</strong></p>
+    <p>Fez um ponto bonito? Aperte o botão na quadra e o vídeo dos últimos 20 segundos aparece aqui.</p>
+  </div>
+</main>
+
+<dialog id="player" class="player">
+  <div class="player-topo">
+    <span id="player-titulo"></span>
+    <button id="fechar" class="fechar" aria-label="Fechar">✕</button>
+  </div>
+  <video id="video" controls playsinline preload="metadata"></video>
+  <div id="cameras" class="cameras" role="tablist"></div>
+  <div class="acoes">
+    <a id="baixar" class="botao primario" download>Baixar vídeo</a>
+    <button id="compartilhar" class="botao">Compartilhar</button>
+  </div>
+</dialog>
+
+<div id="toast" class="toast" role="status" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

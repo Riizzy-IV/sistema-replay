@@ -1,0 +1,5 @@
+servidor/config.json
+servidor/dados/
+servidor/.venv/
+__pycache__/
+.claude/

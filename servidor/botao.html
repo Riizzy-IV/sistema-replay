@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Botão de Replay</title>
+<meta name="theme-color" content="#5dade2">
+<style>
+  :root { --azul: #5dade2; --azul-forte: #1f6fa3; --creme: #faf2df; --marinho: #123a55; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px;
+    background: var(--azul); color: var(--marinho); font-family: system-ui, sans-serif;
+    -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; padding: 16px;
+  }
+  img { width: min(220px, 60vw); }
+  button {
+    width: min(70vw, 300px); aspect-ratio: 1; border-radius: 50%; border: 10px solid var(--creme);
+    background: var(--azul-forte); color: var(--creme); font-size: 30px; font-weight: 800; letter-spacing: .08em;
+    box-shadow: 0 12px 0 #0f3550, 0 18px 30px rgb(0 0 0 / .25); cursor: pointer; transition: transform .08s, box-shadow .08s;
+  }
+  button:active { transform: translateY(10px); box-shadow: 0 2px 0 #0f3550, 0 6px 12px rgb(0 0 0 / .25); }
+  button:disabled { opacity: .6; }
+  #msg { min-height: 1.5em; font-size: 20px; font-weight: 700; text-align: center; }
+  .ok { color: var(--creme); }
+</style>
+</head>
+<body>
+<img src="/app/logo-texto.png" alt="Vila El Mare">
+<button id="btn">REPLAY</button>
+<div id="msg">Aperte para salvar os últimos 20s</div>
+<script>
+  const token = new URLSearchParams(location.search).get('t') || '';
+  const btn = document.getElementById('btn'), msg = document.getElementById('msg');
+  function mostrar(texto, ok) { msg.textContent = texto; msg.className = ok ? 'ok' : ''; }
+  btn.onclick = async () => {
+    btn.disabled = true;
+    navigator.vibrate?.(60);
+    try {
+      const r = await fetch('/replay', { method: 'POST', headers: { 'X-Token': token } });
+      if (r.status === 202) { mostrar('✓ Replay salvo! Já já aparece no app', true); navigator.vibrate?.([60, 80, 60]); }
+      else if (r.status === 429) mostrar('Aguarde, o replay anterior está sendo gerado');
+      else if (r.status === 401) mostrar('Link sem a senha correta (token)');
+      else mostrar('Erro ' + r.status);
+    } catch (e) { mostrar('Sem conexão com o PC da quadra'); }
+    setTimeout(() => { btn.disabled = false; mostrar('Aperte para salvar os últimos 20s'); }, 4000);
+  };
+</script>
+</body>
+</html>
