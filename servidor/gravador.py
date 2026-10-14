@@ -4,13 +4,41 @@ import subprocess
 import threading
 import time
 from pathlib import Path
+from urllib.parse import quote
 
 log = logging.getLogger("gravador")
+
+# Ajustes prontos por marca. No config.json basta {"modelo": "...", "ip": "...", "senha": "..."};
+# qualquer campo informado na câmera (url, transporte, converter, usuario, porta) tem prioridade.
+MODELOS = {
+    # Intelbras/Dahua: configurar na câmera H.264 e I-frame = FPS; aí o vídeo é só copiado
+    "intelbras": {"caminho": "/cam/realmonitor?channel=1&subtype=0", "transporte": "tcp", "converter": False},
+    # Hikvision: idem, H.264 e I-frame = FPS
+    "hikvision": {"caminho": "/Streaming/Channels/101", "transporte": "tcp", "converter": False},
+    # Yoosee: só aceita UDP e transmite em H.265 sem opção de troca, por isso converte para H.264
+    "yoosee": {"caminho": "/onvif1", "transporte": "udp", "converter": True},
+}
+
+
+def resolver_camera(cam: dict) -> dict:
+    """Completa a câmera com os ajustes do modelo e monta a URL RTSP a partir de ip/usuario/senha."""
+    modelo = cam.get("modelo")
+    if not modelo:
+        return cam
+    if modelo not in MODELOS:
+        raise ValueError(f"câmera {cam['id']}: modelo '{modelo}' desconhecido (use {', '.join(MODELOS)})")
+    final = {**MODELOS[modelo], **cam}
+    if "url" not in cam:
+        usuario = quote(final.get("usuario", "admin"), safe="")
+        senha = quote(final.get("senha", ""), safe="!$&'()*+,;=")
+        final["url"] = f"rtsp://{usuario}:{senha}@{final['ip']}:{final.get('porta', 554)}{final['caminho']}"
+    return final
 
 
 class Gravador:
     def __init__(self, cam: dict, pasta_buffer: Path, pasta_logs: Path, segundos_segmento: int,
                  segundos_buffer: int, ffmpeg: str = "ffmpeg"):
+        cam = resolver_camera(cam)
         self.cam = cam
         self.pasta = pasta_buffer / cam["id"]
         self.pasta.mkdir(parents=True, exist_ok=True)
@@ -27,7 +55,7 @@ class Gravador:
         video = ["-c:v", "copy"]
         if url.startswith("rtsp"):
             # -timeout (µs): se a câmera travar, o ffmpeg sai e o loop reinicia
-            entrada = ["-rtsp_transport", "tcp", "-timeout", "10000000", "-i", url]
+            entrada = ["-rtsp_transport", self.cam.get("transporte", "tcp"), "-timeout", "10000000", "-i", url]
         elif url == "teste":
             # câmera simulada ao vivo, com relógio na tela (para testar sem câmera)
             relogio = ("drawtext=fontfile='C\\:/Windows/Fonts/arialbd.ttf':text='%{localtime}':"
@@ -48,6 +76,10 @@ class Gravador:
         else:
             # arquivo de vídeo em loop, para testar sem câmera
             entrada = ["-re", "-stream_loop", "-1", "-i", url]
+        if self.cam.get("converter"):
+            # câmera em H.265 ou sem ajuste de GOP: converte para H.264 com keyframe a cada 1s
+            video = ["-c:v", "libx264", "-preset", "veryfast", "-crf", "23", "-maxrate", "5M", "-bufsize", "10M",
+                     "-pix_fmt", "yuv420p", "-force_key_frames", "expr:gte(t,n_forced*1)"]
         audio_map = "1:a:0" if url == "teste" else "0:a:0?"
         return [
             self.ffmpeg, "-hide_banner", "-loglevel", "error", *entrada,
