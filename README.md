@@ -24,10 +24,23 @@ Na configuração da câmera (pelo navegador, no IP dela):
 - **Codec: H.264** (não H.265: o H.265 não toca na maioria dos celulares e navegadores).
 - **Resolução 1080p, 25 ou 30 fps, bitrate 3–4 Mbps.** Um clipe de 20s fica com uns 9 MB.
 - **Intervalo de I-frame (GOP) = mesmo valor do FPS** (ex.: 30). Isso deixa o corte preciso, com menos de 1s de erro.
-- Anote a URL RTSP. Exemplos:
-  - Intelbras/Dahua: `rtsp://admin:SENHA@IP:554/cam/realmonitor?channel=1&subtype=0`
-  - Hikvision: `rtsp://admin:SENHA@IP:554/Streaming/Channels/101`
-  - Reolink: `rtsp://admin:SENHA@IP:554/h264Preview_01_main`
+- Anote o IP e a senha da câmera.
+
+No `config.json`, cada câmera leva o `modelo`, e o servidor monta a URL e os ajustes sozinho:
+
+| `modelo` | URL montada | Ajustes |
+|---|---|---|
+| `intelbras` (e Dahua) | `rtsp://admin:SENHA@IP:554/cam/realmonitor?channel=1&subtype=0` | TCP, vídeo copiado (configure H.264 e GOP na câmera) |
+| `hikvision` | `rtsp://admin:SENHA@IP:554/Streaming/Channels/101` | TCP, vídeo copiado (configure H.264 e GOP na câmera) |
+| `yoosee` | `rtsp://admin:SENHA@IP:554/onvif1` | UDP, converte H.265 → H.264 (usa mais CPU do PC) |
+
+```json
+{ "id": "cam1", "nome": "Fundo", "modelo": "intelbras", "ip": "192.168.1.50", "senha": "SENHA" }
+```
+
+Opcionais: `usuario` (padrão `admin`), `porta` (padrão 554). Para outra marca, informe a `url` completa no lugar de `modelo`/`ip`/`senha` (ex.: Reolink `rtsp://admin:SENHA@IP:554/h264Preview_01_main`), e se precisar `"transporte": "udp"` e `"converter": true`.
+
+**Yoosee:** a senha é a do dispositivo (app Yoosee → Configurações → Segurança), não a da conta. Ela grava a uns 10 fps à noite e é Wi-Fi; serve para teste, mas para a quadra prefira uma câmera com cabo.
 
 Teste a URL no VLC (Mídia → Abrir fluxo de rede) antes de seguir.
 
@@ -53,7 +66,7 @@ Teste a URL no VLC (Mídia → Abrir fluxo de rede) antes de seguir.
    ```
 2. Copie `servidor/config.example.json` para `servidor/config.json` e preencha:
    - `token`: uma senha longa qualquer (a mesma vai no ESP32);
-   - `cameras`: URL RTSP de cada câmera;
+   - `cameras`: `modelo`, IP e senha de cada câmera (ver seção 1);
    - `supabase`: URL e chave secreta. Deixe a `url` vazia para testar só local.
 3. Rode `servidor\iniciar.bat`. Na primeira vez ele instala tudo.
 4. Abra **http://localhost:8000** no PC. É o painel de teste, com o botão "Gerar replay" e o status das câmeras.

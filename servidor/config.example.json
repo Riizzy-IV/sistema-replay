@@ -9,7 +9,8 @@
   "ffmpeg": "ffmpeg",
   "pasta_dados": "dados",
   "cameras": [
-    { "id": "cam1", "nome": "Fundo", "url": "rtsp://admin:SENHA@192.168.1.50:554/cam/realmonitor?channel=1&subtype=0" }
+    { "id": "cam1", "nome": "Fundo", "modelo": "intelbras", "ip": "192.168.1.50", "senha": "SENHA-DA-CAMERA" },
+    { "id": "cam2", "nome": "Lateral", "modelo": "yoosee", "ip": "192.168.1.51", "senha": "SENHA-DA-CAMERA" }
   ],
   "supabase": {
     "url": "https://SEU-PROJETO.supabase.co",
